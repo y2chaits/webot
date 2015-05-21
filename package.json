@@ -5,6 +5,7 @@
   "author": "Chaitanya Bagaria <chaitanya.bagaria@wepay.com>",
   "description": "A super awesome helper robot for WePay",
   "dependencies": {
+    "cheerio": "*",
     "htmlparser": "^1.7.6",
     "hubot": "^2.11.0",
     "hubot-diagnostics": "0.0.1",
