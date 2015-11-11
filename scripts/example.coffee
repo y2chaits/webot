@@ -13,6 +13,8 @@ module.exports = (robot) ->
         msg.send "http://brut.us/johnny.jpg"
   robot.respond /shaq/i, (msg) ->
         msg.send "http://brut.us/shaq.jpeg"
+  robot.respond /spock/i, (msg) ->
+        msg.send "http://bit.ly/1Y51t58"
 
   # robot.hear /badger/i, (msg) ->
   #   msg.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
