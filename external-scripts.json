@@ -2,6 +2,7 @@
   "hubot-help",
   "hubot-heroku-keepalive",
   "hubot-google-translate",
+  "hubot-plusplus",
   "hubot-meme",
   "hubot-redis-brain",
   "hubot-rules",
