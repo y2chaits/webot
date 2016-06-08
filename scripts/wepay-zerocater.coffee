@@ -26,11 +26,11 @@ module.exports = (robot) =>
     if date isnt undefined && date != ''
       date = getTimestamp(date)
       if date is false
-        getLunch msg
+        getCatering msg, false
       else
         getCatering msg, date
     else
-      getCatering msg, moment()
+      getLunch msg
 
 getTimestamp = (date) ->
   if !isNaN(new Date(date).getTime())
