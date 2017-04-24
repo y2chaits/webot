@@ -3,7 +3,6 @@
 #
 # Dependencies:
 #   "cheerio": "0.12.x"
-#   "moment": "2.0.x"
 #
 # Configuration:
 #   HUBOT_ZEROCATER_MENU_URL - In the format of https://zerocater.com/m/xxxx
@@ -13,11 +12,11 @@
 #   hubot zerocater - Pulls your catering menu for today
 #   hubot zerocater yesterday - Yesterday's catering menu
 #   hubot zerocater tomorrow - Tomorrow's catering menu
+#   hubot zerocater YYYY-MM-DD - Catering menu for specified date
 #
 # Author:
 #   jonursenbach
 
-moment = require 'moment'
 cheerio = require 'cheerio'
 
 module.exports = (robot) =>
@@ -30,22 +29,38 @@ module.exports = (robot) =>
       else
         getLunch msg, date
     else
-      getLunch msg, moment()
+      getLunch msg, new Date()
 
 getTimestamp = (date) ->
   if !isNaN(new Date(date).getTime())
-    return moment(date)
+    return new Date(date).getTime()
 
   if /(yesterday|today|tomorrow)/i.test(date)
     switch date
       when 'yesterday'
-        return moment().subtract('d', 1)
+        return Date().UTC().getTime() - 24*60*60*1000
       when 'today'
-        return moment()
+        return Date().UTC()
       when 'tomorrow'
-        return moment().add('d', 1)
+        return Date().UTC().getTime() + 24*60*60*1000
   else
     return false
+
+getLunch = (msg, date) ->
+  console.log("time now: " + date);
+  localTimeSec = 
+
+  url = "https://api.zerocater.com/v3/companies/#{process.env.ZEROCATER_TAG}/meals"
+  msg.http(url).get() (err, res, body) ->
+    meals = JSON.parse(body)
+
+    themeal = (m for m in meals when moment(m.time).format('YYYY-MM-DD') == date.format('YYYY-MM-DD'))[0]
+    details = "https://zerocater.com/m/#{process.env.ZEROCATER_TAG}/#{themeal.id}"
+    msg.http("#{themeal.url}").get() (err, res, meal) ->
+      m = JSON.parse(meal)
+      choices = (item.name for item in m.items).join(', ')
+      img = m.vendor_image_url.replace /upload/, "upload/c_fill,h_250,w_400"
+      msg.send "Lunch: #{m.name} (from #{m.vendor_name})\n#{choices}\nDetails: #{details}\n#{img}"
 
 # getCatering = (msg, date) ->
 #   if date is false
@@ -98,19 +113,3 @@ getTimestamp = (date) ->
 
 #       if (!cateringFound)
 #         msg.send "Sorry, I was unable to find a menu for #{searchDate}."
-
-getLunch = (msg, date) ->
-  # day = if !msg.match[1] then 'today' else msg.match[1].trim().toLowerCase()
-  # now =  Math.floor(new Date().getTime() / 1000)
-  # now = now + 43200 if day == 'tomorrow'
-  
-  url = "https://api.zerocater.com/v3/companies/#{process.env.ZEROCATER_TAG}/meals"
-  msg.http(url).get() (err, res, body) ->
-    meals = JSON.parse(body)
-    themeal = (m for m in meals when m.time > date - 14400)[0]
-    details = "https://zerocater.com/m/#{process.env.ZEROCATER_TAG}/#{themeal.id}"
-    msg.http("#{themeal.url}").get() (err, res, meal) ->
-      m = JSON.parse(meal)
-      choices = (item.name for item in m.items).join(', ')
-      img = m.vendor_image_url.replace /upload/, "upload/c_fill,h_250,w_400"
-      msg.send "Lunch #{day}: #{m.name} (from #{m.vendor_name})\n#{choices}\nDetails: #{details}\n#{img}"
